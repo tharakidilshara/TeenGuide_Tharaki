@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QMessageBox
 from views.registrationView import RegistrationView  # Make sure the path is correct
+import subprocess
 
 class LoginView(QWidget):
     def __init__(self, controller):
@@ -41,6 +42,8 @@ class LoginView(QWidget):
         password = self.password_input.text()
         result = self.controller.login(email, password)
         self.show_message(result)
+        moodtrack_path = r".\views\moodtrack.py"
+        subprocess.Popen(["python", moodtrack_path, email])
 
     def show_register_form(self):
         # Hide the current login window and show the registration window
