@@ -40,3 +40,4 @@ build/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+.teenguidenew-firebase-admin.json

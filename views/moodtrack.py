@@ -2,7 +2,8 @@ import sys
 import os
 import random
 import stressed_support
-
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))) 
+from models.authModel import AuthModel
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QLabel, QPushButton,
     QRadioButton, QVBoxLayout, QMessageBox
@@ -17,10 +18,13 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MUSIC_FOLDER = os.path.join(BASE_DIR, "music")
 MESSAGES_FOLDER = os.path.join(BASE_DIR, "messages")
 
+email = sys.argv[1]  # The email is the first argument passed to the script
+print(f"Email passed to moodtrack.py: {email}")
+
 
 class MoodTracker(QMainWindow):
-    def __init__(self):
-        super().__init__()
+    def __init__(self):        
+        super().__init__()        
         self.setWindowTitle("Teen Health Care - Mood Tracker")
         self.setGeometry(400, 200, 400, 300)
 
@@ -62,12 +66,14 @@ class MoodTracker(QMainWindow):
         if self.radio_happy.isChecked():
             print("✅ User selected Happy")
             self.user_mood = "Happy"
+            self.update_firebase_mood()  # Update mood in Firebase
             self.close()
             self.music_choice_window = MusicChoiceWindow()
             self.music_choice_window.show()
         elif self.radio_stressed.isChecked():
             print("✅ User selected Stressed")
             self.user_mood = "Stressed"
+            self.update_firebase_mood()  # Update mood in Firebase
             self.close()
             self.mood_rating_window = stressed_support.MoodRatingWindow()
             print("✅ MoodRatingWindow initialized")
@@ -75,8 +81,26 @@ class MoodTracker(QMainWindow):
         else:
             QMessageBox.warning(self, "Warning", "Please select Happy or Stressed before proceeding.")
 
-        print(f"User mood updated to: {self.user_mood}")
-        # response = self.model.updateUser(email, password, first_name, last_name, dob, gender)
+    def update_firebase_mood(self):
+        """Update the user mood in Firebase Firestore."""
+        # You need to replace 'user_id' with the actual user ID.
+        # Assuming the user's unique ID is known (e.g., from authentication)
+        auth_model = AuthModel()  # Initialize authentication model
+    
+        user_id = auth_model.get_user_id_by_email(email)  # Get user ID from email
+        
+        if "Error" in user_id or user_id == "User not found":
+            print(f"Failed to fetch user ID: {user_id}")
+            return
+
+        try:
+            # Update Firebase Realtime Database with the selected mood
+            auth_model.db.child("users").child(user_id).update({"mood": self.user_mood})
+            print(f"✅ User mood updated to: {self.user_mood}")
+        except Exception as e:
+            print(f"❌ Error updating mood: {e}")
+
+        
 
 
 class MusicChoiceWindow(QMainWindow):

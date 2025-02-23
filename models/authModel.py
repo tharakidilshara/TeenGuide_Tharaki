@@ -48,3 +48,18 @@ class AuthModel:
             # Print the full error message to help debug
             print("Error occurred:", e)
             return f"Registration Failed: {str(e)}"
+        
+    def get_user_id_by_email(self, email):
+        """Retrieve the user ID (UID) associated with the given email from Firebase Realtime Database."""
+        try:
+            users = self.db.child("users").get()
+            if users.each():
+                for user in users.each():
+                    user_data = user.val()
+                    if "email" in user_data and user_data["email"] == email:
+                        return user.key()  # Return the user UID
+
+            return "User not found"
+
+        except Exception as e:
+            return f"Error: {str(e)}"
